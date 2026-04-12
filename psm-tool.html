@@ -1,88 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PSM Covariate Tool</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PSM Covariate Screening Tool</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <h1>PSM Covariate Screening Tool</h1>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="psm-tool.html">PSM Tool</a>
-    </nav>
-  </header>
-
-  <main>
-    <section>
-      <h2>Evaluate a Variable</h2>
-
-      <label>
-        Variable name:
-        <input type="text" id="variableName" placeholder="e.g. aneurysm size">
-      </label>
-
-      <div>
-        <p>1. Does the variable reflect baseline status or a clinical feature already established when treatment selection occurred?</p>
-        <select id="baseline">
-          <option value="">Select</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-badge">PSM</div>
+        <div>
+          <h1>PSM Covariate Screening Tool</h1>
+          <p class="brand-subtitle">Structured support for variable triage in propensity score models</p>
+        </div>
       </div>
 
-      <div>
-        <p>2. Is the variable part of the mechanism through which treatment may affect the outcome?</p>
-        <select id="mediator">
-          <option value="">Select</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
+      <div class="context-card">
+        <h2>Study Context</h2>
+
+        <label for="exposure">Exposure / Treatment</label>
+        <input
+          type="text"
+          id="exposure"
+          placeholder="e.g. Coiling vs clipping"
+        />
+
+        <label for="outcome">Outcome</label>
+        <input
+          type="text"
+          id="outcome"
+          placeholder="e.g. 90-day functional outcome"
+        />
+
+        <label for="variableName">Variable under review</label>
+        <input
+          type="text"
+          id="variableName"
+          placeholder="e.g. aneurysm size"
+        />
       </div>
 
-      <div>
-        <p>3. Is the variable shaped by both treatment selection and downstream clinical events such that adjustment could distort the treatment-outcome relationship?</p>
-        <select id="collider">
-          <option value="">Select</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
+      <div class="live-context">
+        <h2>Live Summary</h2>
+        <div class="summary-row">
+          <span class="summary-label">Exposure</span>
+          <span id="liveExposure" class="summary-value muted">Not entered</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Outcome</span>
+          <span id="liveOutcome" class="summary-value muted">Not entered</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Variable</span>
+          <span id="liveVariable" class="summary-value muted">Not entered</span>
+        </div>
       </div>
+    </aside>
 
-      <div>
-        <p>4. Does the variable influence treatment selection without a plausible independent relationship to outcome?</p>
-        <select id="exposureOnly">
-          <option value="">Select</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
-      </div>
+    <main class="main-content">
+      <header class="topbar">
+        <nav>
+          <a href="index.html" class="active">Tool</a>
+        </nav>
+      </header>
 
-      <div>
-        <p>5. Is the variable a proxy for baseline disease severity or anatomical complexity?</p>
-        <select id="severity">
-          <option value="">Select</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
-      </div>
+      <section class="hero-card">
+        <p class="eyebrow">Prototype v2</p>
+        <h2>Guided Variable Screening</h2>
+        <p>
+          This prototype walks investigators through the first two exclusion steps:
+          baseline eligibility and mediation.
+        </p>
+      </section>
 
-      <div>
-        <p>6. Does the variable plausibly influence both treatment selection and outcome?</p>
-        <select id="confounder">
-          <option value="">Select</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
-      </div>
+      <section class="flow-card">
+        <div id="introStep" class="step active">
+          <h3>Start screening</h3>
+          <p>
+            First define the exposure, outcome, and variable under review. Then begin the guided assessment.
+          </p>
+          <button id="startBtn" class="primary-btn">Begin</button>
+        </div>
 
-      <button onclick="evaluateVariable()">Evaluate</button>
+        <div id="step1" class="step hidden">
+          <div class="step-meta">Step 1 of 2</div>
+          <h3>Baseline check</h3>
+          <p class="question">
+            Does the variable reflect baseline status or a clinical feature already established when treatment selection occurred?
+          </p>
+          <p class="help-text">
+            If the variable arose only after treatment initiation or was defined using post-treatment information, it should not be included in the propensity score model.
+          </p>
 
-      <section id="result"></section>
-    </section>
-  </main>
+          <div class="button-group">
+            <button class="answer-btn" onclick="handleStep1('yes')">Yes</button>
+            <button class="answer-btn secondary" onclick="handleStep1('no')">No</button>
+          </div>
+        </div>
+
+        <div id="step2" class="step hidden">
+          <div class="step-meta">Step 2 of 2</div>
+          <h3>Mediator check</h3>
+          <p class="question">
+            Is the variable part of the mechanism through which treatment may affect the outcome?
+          </p>
+          <p class="help-text">
+            If yes, the variable may function as a mediator and should not be included in the propensity score model.
+          </p>
+
+          <div class="button-group">
+            <button class="answer-btn" onclick="handleStep2('yes')">Yes</button>
+            <button class="answer-btn secondary" onclick="handleStep2('no')">No</button>
+          </div>
+        </div>
+
+        <div id="resultCard" class="result-card hidden"></div>
+      </section>
+    </main>
+  </div>
 
   <script src="script.js"></script>
 </body>
