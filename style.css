@@ -11,6 +11,8 @@
   --success-border: #9fe3b3;
   --danger-bg: #fff1f2;
   --danger-border: #f4b5bf;
+  --warning-bg: #fff8eb;
+  --warning-border: #f3d18b;
   --shadow: 0 12px 30px rgba(20, 28, 48, 0.08);
   --radius: 18px;
 }
@@ -96,6 +98,11 @@ label {
   color: #d7def0;
 }
 
+.inline-label {
+  color: var(--text);
+  margin-top: 0;
+}
+
 input {
   width: 100%;
   padding: 12px 14px;
@@ -105,6 +112,12 @@ input {
   color: white;
   font-size: 0.96rem;
   outline: none;
+}
+
+.main-input {
+  background: white;
+  color: var(--text);
+  border: 1px solid var(--border);
 }
 
 input::placeholder {
@@ -148,16 +161,6 @@ input:focus {
   padding: 28px;
 }
 
-.topbar {
-  margin-bottom: 20px;
-}
-
-.topbar nav a {
-  color: var(--accent);
-  text-decoration: none;
-  font-weight: 600;
-}
-
 .hero-card,
 .flow-card {
   background: var(--panel);
@@ -195,11 +198,11 @@ input:focus {
 
 .flow-card {
   padding: 28px;
-  min-height: 360px;
+  min-height: 420px;
 }
 
 .step {
-  animation: fadeSlide 0.35s ease;
+  animation: fadeSlide 0.28s ease;
 }
 
 .hidden {
@@ -219,10 +222,10 @@ input:focus {
 }
 
 .question {
-  font-size: 1.2rem;
+  font-size: 1.18rem;
   line-height: 1.55;
   margin-bottom: 12px;
-  max-width: 850px;
+  max-width: 860px;
 }
 
 .help-text {
@@ -239,7 +242,9 @@ input:focus {
 }
 
 .primary-btn,
-.answer-btn {
+.answer-btn,
+.secondary-btn,
+.danger-btn {
   border: none;
   border-radius: 14px;
   padding: 14px 22px;
@@ -262,22 +267,46 @@ input:focus {
   background: var(--accent-dark);
 }
 
-.answer-btn.secondary {
+.answer-btn.secondary,
+.secondary-btn {
   background: #eef2ff;
   color: var(--accent);
   box-shadow: none;
 }
 
-.answer-btn.secondary:hover {
+.answer-btn.secondary:hover,
+.secondary-btn:hover {
   background: #dfe7ff;
 }
 
-.result-card {
+.danger-btn {
+  background: #fee4e2;
+  color: #b42318;
+}
+
+.danger-btn:hover {
+  background: #ffd7d3;
+}
+
+.small-btn {
+  margin-top: 14px;
+  width: 100%;
+  padding: 12px 14px;
+}
+
+.full-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px 14px;
+}
+
+.result-card,
+.summary-card {
   border-radius: 18px;
   padding: 22px;
   margin-top: 10px;
   border: 1px solid var(--border);
-  animation: fadeSlide 0.35s ease;
+  animation: fadeSlide 0.28s ease;
 }
 
 .result-card.exclude {
@@ -285,9 +314,14 @@ input:focus {
   border-color: var(--danger-border);
 }
 
-.result-card.continue {
+.result-card.include {
   background: var(--success-bg);
   border-color: var(--success-border);
+}
+
+.result-card.caution {
+  background: var(--warning-bg);
+  border-color: var(--warning-border);
 }
 
 .result-kicker {
@@ -298,12 +332,14 @@ input:focus {
   margin-bottom: 10px;
 }
 
-.result-card h3 {
+.result-card h3,
+.summary-card h3 {
   margin: 0 0 12px 0;
   font-size: 1.5rem;
 }
 
-.result-card p {
+.result-card p,
+.summary-card p {
   margin: 0 0 12px 0;
   line-height: 1.6;
 }
@@ -324,6 +360,13 @@ input:focus {
   line-height: 1.45;
 }
 
+.action-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
 .restart-btn {
   margin-top: 18px;
   background: #172033;
@@ -337,6 +380,52 @@ input:focus {
 
 .restart-btn:hover {
   background: #0f1728;
+}
+
+.summary-table-wrap {
+  overflow-x: auto;
+  margin-top: 16px;
+}
+
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.summary-table th,
+.summary-table td {
+  text-align: left;
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.summary-table th {
+  background: #f8fafc;
+}
+
+.badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.badge-include {
+  background: #dcfae6;
+  color: #067647;
+}
+
+.badge-exclude {
+  background: #ffe4e8;
+  color: #c01048;
+}
+
+.badge-caution {
+  background: #fff1cc;
+  color: #b54708;
 }
 
 @keyframes fadeSlide {
@@ -353,10 +442,6 @@ input:focus {
 @media (max-width: 980px) {
   .app-shell {
     grid-template-columns: 1fr;
-  }
-
-  .sidebar {
-    padding-bottom: 12px;
   }
 
   .main-content {
