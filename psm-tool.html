@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PSM Covariate Tool</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>PSM Covariate Screening Tool</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="psm-tool.html">PSM Tool</a>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <h2>Evaluate a Variable</h2>
+
+      <label>
+        Variable name:
+        <input type="text" id="variableName" placeholder="e.g. aneurysm size">
+      </label>
+
+      <div>
+        <p>1. Does the variable reflect baseline status or a clinical feature already established when treatment selection occurred?</p>
+        <select id="baseline">
+          <option value="">Select</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+
+      <div>
+        <p>2. Is the variable part of the mechanism through which treatment may affect the outcome?</p>
+        <select id="mediator">
+          <option value="">Select</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+
+      <div>
+        <p>3. Is the variable shaped by both treatment selection and downstream clinical events such that adjustment could distort the treatment-outcome relationship?</p>
+        <select id="collider">
+          <option value="">Select</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+
+      <div>
+        <p>4. Does the variable influence treatment selection without a plausible independent relationship to outcome?</p>
+        <select id="exposureOnly">
+          <option value="">Select</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+
+      <div>
+        <p>5. Is the variable a proxy for baseline disease severity or anatomical complexity?</p>
+        <select id="severity">
+          <option value="">Select</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+
+      <div>
+        <p>6. Does the variable plausibly influence both treatment selection and outcome?</p>
+        <select id="confounder">
+          <option value="">Select</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+
+      <button onclick="evaluateVariable()">Evaluate</button>
+
+      <section id="result"></section>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
