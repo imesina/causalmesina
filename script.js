@@ -30,6 +30,7 @@ let decisionPath = [];
 let variableResults = [];
 let currentVariable = "";
 let currentStepIndex = 0;
+let severityFlag = false;
 
 const steps = [
   {
@@ -153,16 +154,18 @@ const steps = [
     help:
       "If yes, strong consideration should be given to inclusion, particularly if outcome relevance is also plausible.",
     onYes: () => {
+      severityFlag = true;
       decisionPath.push(
         `${currentVariable} appears to function as a proxy for baseline disease severity or anatomical complexity.`
       );
-      goToStep(5, { severityYes: true });
+      goToStep(5);
     },
     onNo: () => {
+      severityFlag = false;
       decisionPath.push(
         `${currentVariable} was not identified as a proxy for baseline disease severity or anatomical complexity.`
       );
-      goToStep(5, { severityYes: false });
+      goToStep(5);
     }
   },
   {
@@ -191,11 +194,7 @@ const steps = [
         `${currentVariable} was not judged to plausibly influence both treatment selection and outcome.`
       );
 
-      const severityTriggered = decisionPath.some(item =>
-        item.includes("proxy for baseline disease severity or anatomical complexity")
-      );
-
-      if (severityTriggered) {
+      if (severityFlag) {
         finalizeVariable({
           classification: "Use caution / consider inclusion with strong justification",
           badge: "caution",
@@ -281,6 +280,7 @@ function beginVariableScreening() {
 
   currentVariable = variable;
   decisionPath = [];
+  severityFlag = false;
   goToStep(0);
 }
 
@@ -428,6 +428,7 @@ function resetSession() {
   variableResults = [];
   currentVariable = "";
   currentStepIndex = 0;
+  severityFlag = false;
 
   exposureInput.disabled = false;
   outcomeInput.disabled = false;
