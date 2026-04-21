@@ -1,21 +1,29 @@
-const exposureInput = document.getElementById("exposure");
-const outcomeInput = document.getElementById("outcome");
-const variableInput = document.getElementById("variableName");
+const exposureInput = document.getElementById("exposureInput");
+const outcomeInput = document.getElementById("outcomeInput");
+const variableInput = document.getElementById("variableInput");
 
 const lockContextBtn = document.getElementById("lockContextBtn");
-const beginVariableBtn = document.getElementById("beginVariableBtn");
+const beginScreenBtn = document.getElementById("beginScreenBtn");
 const showSummaryBtn = document.getElementById("showSummaryBtn");
 const resetSessionBtn = document.getElementById("resetSessionBtn");
 
 const liveExposure = document.getElementById("liveExposure");
 const liveOutcome = document.getElementById("liveOutcome");
 const liveVariable = document.getElementById("liveVariable");
+const liveVariableHint = document.getElementById("liveVariableHint");
 const liveCount = document.getElementById("liveCount");
 
+const contextStatus = document.getElementById("contextStatus");
+
 const variableEntry = document.getElementById("variableEntry");
+const screeningFlow = document.getElementById("screeningFlow");
 const questionCard = document.getElementById("questionCard");
 const resultCard = document.getElementById("resultCard");
-const summaryCard = document.getElementById("summaryCard");
+const summarySection = document.getElementById("summarySection");
+const summaryTableBody = document.getElementById("summaryTableBody");
+
+const flowCurrentVariable = document.getElementById("flowCurrentVariable");
+const flowStepCounter = document.getElementById("flowStepCounter");
 
 const stepMeta = document.getElementById("stepMeta");
 const stepTitle = document.getElementById("stepTitle");
@@ -217,15 +225,29 @@ const steps = [
   }
 ];
 
-function updateLiveSummary() {
-  liveExposure.textContent = exposureInput.value.trim() || "Not entered";
-  liveOutcome.textContent = outcomeInput.value.trim() || "Not entered";
-  liveVariable.textContent = variableInput.value.trim() || "Not entered";
-  liveCount.textContent = variableResults.length.toString();
+function setEmptyState(el, isEmpty) {
+  el.classList.toggle("is-empty", isEmpty);
+}
 
-  liveExposure.classList.toggle("muted", !exposureInput.value.trim());
-  liveOutcome.classList.toggle("muted", !outcomeInput.value.trim());
-  liveVariable.classList.toggle("muted", !variableInput.value.trim());
+function updateLiveSummary() {
+  const exposure = exposureInput.value.trim();
+  const outcome = outcomeInput.value.trim();
+  const variable = variableInput.value.trim();
+
+  liveExposure.textContent = exposure || "Not entered";
+  liveOutcome.textContent = outcome || "Not entered";
+  liveVariable.textContent = currentVariable || variable || "Awaiting variable entry";
+  liveCount.textContent = String(variableResults.length);
+
+  setEmptyState(liveExposure, !exposure);
+  setEmptyState(liveOutcome, !outcome);
+  setEmptyState(liveVariable, !(currentVariable || variable));
+
+  if (currentVariable || variable) {
+    liveVariableHint.textContent = "Ready for classification.";
+  } else {
+    liveVariableHint.textContent = "Enter one covariate to classify it through the screening flow.";
+  }
 }
 
 function getContextValues() {
@@ -236,15 +258,14 @@ function getContextValues() {
   };
 }
 
-function hideAllMainCards() {
-  variableEntry.classList.add("hidden");
-  questionCard.classList.add("hidden");
+function hideDynamicCards() {
+  screeningFlow.classList.add("hidden");
   resultCard.classList.add("hidden");
-  summaryCard.classList.add("hidden");
+  summarySection.classList.add("hidden");
 }
 
 function showVariableEntry() {
-  hideAllMainCards();
+  hideDynamicCards();
   variableEntry.classList.remove("hidden");
   updateLiveSummary();
 }
@@ -263,6 +284,7 @@ function lockStudyContext() {
   outcomeInput.disabled = true;
   lockContextBtn.textContent = "Study context locked";
   lockContextBtn.disabled = true;
+  contextStatus.classList.remove("hidden");
   updateLiveSummary();
 }
 
@@ -281,15 +303,18 @@ function beginVariableScreening() {
   currentVariable = variable;
   decisionPath = [];
   severityFlag = false;
+  variableEntry.classList.add("hidden");
+  screeningFlow.classList.remove("hidden");
   goToStep(0);
 }
 
 function goToStep(index) {
   currentStepIndex = index;
-  hideAllMainCards();
-  questionCard.classList.remove("hidden");
-
   const step = steps[index];
+
+  flowCurrentVariable.textContent = currentVariable;
+  flowStepCounter.textContent = `${index + 1} / ${steps.length}`;
+
   stepMeta.textContent = step.meta;
   stepTitle.textContent = step.title;
   stepQuestion.textContent = step.question;
@@ -313,7 +338,9 @@ function finalizeVariable({ classification, badge, kicker, title, body }) {
     path: [...decisionPath]
   });
 
-  hideAllMainCards();
+  screeningFlow.classList.add("hidden");
+  summarySection.classList.add("hidden");
+
   resultCard.className = `result-card ${badge}`;
   resultCard.classList.remove("hidden");
 
@@ -329,9 +356,9 @@ function finalizeVariable({ classification, badge, kicker, title, body }) {
       </ul>
     </div>
 
-    <div class="action-row">
-      <button class="primary-btn" id="screenAnotherBtn">Screen another variable</button>
-      <button class="secondary-btn" id="viewSummaryBtn">View session summary</button>
+    <div class="action-row" style="margin-top:16px;">
+      <button class="btn btn-primary" id="screenAnotherBtn">Screen another variable</button>
+      <button class="btn btn-secondary" id="viewSummaryBtn">View session summary</button>
     </div>
   `;
 
@@ -358,21 +385,22 @@ function badgeHtml(type, label) {
 }
 
 function renderSummary() {
-  hideAllMainCards();
-  summaryCard.classList.remove("hidden");
+  hideDynamicCards();
+  variableEntry.classList.add("hidden");
+  summarySection.classList.remove("hidden");
 
   if (variableResults.length === 0) {
-    summaryCard.innerHTML = `
-      <h3>Session summary</h3>
-      <p>No variables have been screened yet.</p>
-      <button class="restart-btn" onclick="showVariableEntry()">Back</button>
+    summaryTableBody.innerHTML = `
+      <tr>
+        <td colspan="3">No variables have been screened yet.</td>
+      </tr>
     `;
     return;
   }
 
-  const rows = variableResults
+  summaryTableBody.innerHTML = variableResults
     .map(
-      item => `
+      (item) => `
         <tr>
           <td><strong>${item.variable}</strong></td>
           <td>${badgeHtml(item.badge, item.classification)}</td>
@@ -381,43 +409,6 @@ function renderSummary() {
       `
     )
     .join("");
-
-  summaryCard.innerHTML = `
-    <h3>Session summary</h3>
-    <p>
-      Exposure: <strong>${exposureInput.value.trim()}</strong><br>
-      Outcome: <strong>${outcomeInput.value.trim()}</strong>
-    </p>
-
-    <div class="summary-table-wrap">
-      <table class="summary-table">
-        <thead>
-          <tr>
-            <th>Variable</th>
-            <th>Classification</th>
-            <th>Initial rationale snapshot</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows}
-        </tbody>
-      </table>
-    </div>
-
-    <div class="action-row">
-      <button class="primary-btn" id="addMoreVariablesBtn">Screen another variable</button>
-      <button class="danger-btn" id="clearSessionBtn">Reset session</button>
-    </div>
-  `;
-
-  document.getElementById("addMoreVariablesBtn").onclick = () => {
-    variableInput.value = "";
-    currentVariable = "";
-    updateLiveSummary();
-    showVariableEntry();
-  };
-
-  document.getElementById("clearSessionBtn").onclick = resetSession;
 }
 
 function resetSession() {
@@ -438,13 +429,18 @@ function resetSession() {
 
   lockContextBtn.textContent = "Lock study context";
   lockContextBtn.disabled = false;
+  contextStatus.classList.add("hidden");
+
+  resultCard.className = "result-card hidden";
+  resultCard.innerHTML = "";
+  summaryTableBody.innerHTML = "";
 
   updateLiveSummary();
   showVariableEntry();
 }
 
 lockContextBtn.addEventListener("click", lockStudyContext);
-beginVariableBtn.addEventListener("click", beginVariableScreening);
+beginScreenBtn.addEventListener("click", beginVariableScreening);
 showSummaryBtn.addEventListener("click", renderSummary);
 resetSessionBtn.addEventListener("click", resetSession);
 
