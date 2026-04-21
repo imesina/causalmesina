@@ -8,100 +8,202 @@
 </head>
 <body>
   <div class="app-shell">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-badge">PSM</div>
-        <div>
-          <h1>Propensity score Matching - Covariate Screening Tool</h1>
-          <p class="brand-subtitle">
-            Structured support for variable triage in propensity score models
+    <div class="top-strip">
+      <div class="kicker">PSM • Covariate Screening</div>
+    </div>
+
+    <header class="hero-card">
+      <div class="hero-meta">
+        <span class="hero-chip">Prototype v1.3</span>
+      </div>
+
+      <h1 class="hero-title">
+        Propensity Score Matching <span class="accent">Covariate Screening Tool</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        Structured support for variable triage in propensity score models.
+      </p>
+    </header>
+
+    <div class="layout-grid">
+      <main class="panel panel-main">
+        <section class="module-block">
+          <div class="module-header">
+            <div>
+              <p class="module-kicker">Session setup</p>
+              <h2 class="section-title">Study Context</h2>
+            </div>
+          </div>
+
+          <div class="field-grid">
+            <div class="field">
+              <label for="exposureInput">Exposure/Treatment to be compared</label>
+              <input
+                id="exposureInput"
+                class="main-input"
+                type="text"
+                placeholder="e.g. Coiling vs clipping"
+              />
+            </div>
+
+            <div class="field">
+              <label for="outcomeInput">Primary Outcome</label>
+              <input
+                id="outcomeInput"
+                class="main-input"
+                type="text"
+                placeholder="e.g. 90-day mRS"
+              />
+            </div>
+          </div>
+
+          <div class="context-actions">
+            <button id="lockContextBtn" class="btn btn-primary">
+              Lock study context
+            </button>
+
+            <div id="contextStatus" class="context-status hidden" aria-live="polite">
+              <span class="context-status-dot"></span>
+              <span>Study context locked</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="module-block">
+          <div class="module-header">
+            <div>
+              <p class="module-kicker">Interactive screening</p>
+              <h2 class="section-title">Guided Variable Screening</h2>
+            </div>
+          </div>
+
+          <p class="module-intro">
+            Screen one variable at a time, classify it through the decision flow, and build a running summary for the full covariate set.
           </p>
-        </div>
-      </div>
 
-      <div class="context-card">
-        <h2>Study Context</h2>
+          <div id="variableEntry" class="variable-entry-card step">
+            <label for="variableInput" class="inline-label">Candidate variable</label>
+            <input
+              id="variableInput"
+              class="main-input"
+              type="text"
+              placeholder="Enter one candidate covariate"
+            />
 
-        <label for="exposure">Exposure/Treatment to be compared</label>
-        <input id="exposure" type="text" placeholder="e.g. Coiling vs clipping" />
+            <div class="variable-entry-actions">
+              <button id="beginScreenBtn" class="btn btn-primary">
+                Begin screening
+              </button>
+            </div>
+          </div>
 
-        <label for="outcome">Primary Outcome</label>
-        <input id="outcome" type="text" placeholder="e.g. 90-day mRS" />
+          <div id="screeningFlow" class="flow-card hidden">
+            <div class="flow-topbar">
+              <div class="flow-current">
+                <span class="flow-current-label">Current variable</span>
+                <span id="flowCurrentVariable" class="flow-current-value">—</span>
+              </div>
 
-        <button id="lockContextBtn" class="primary-btn small-btn">Lock study context</button>
-      </div>
+              <div class="flow-progress">
+                <span class="flow-progress-label">Step</span>
+                <span id="flowStepCounter" class="flow-progress-value">1 / 6</span>
+              </div>
+            </div>
 
-      <div class="live-context">
-        <h2>Live Summary</h2>
-        <div class="summary-row">
-          <span class="summary-label">Exposure</span>
-          <span id="liveExposure" class="summary-value muted">Not entered</span>
-        </div>
-        <div class="summary-row">
-          <span class="summary-label">Outcome</span>
-          <span id="liveOutcome" class="summary-value muted">Not entered</span>
-        </div>
-        <div class="summary-row">
-          <span class="summary-label">Variable</span>
-          <span id="liveVariable" class="summary-value muted">Not entered</span>
-        </div>
-        <div class="summary-row">
-          <span class="summary-label">Variables screened</span>
-          <span id="liveCount" class="summary-value">0</span>
-        </div>
-      </div>
+            <div id="questionCard" class="step">
+              <div id="stepMeta" class="step-meta"></div>
+              <h3 id="stepTitle"></h3>
+              <p id="stepQuestion" class="question"></p>
+              <p id="stepHelp" class="help-text"></p>
 
-      <div class="live-context">
-        <h2>Session Controls</h2>
-        <button id="showSummaryBtn" class="secondary-btn full-btn">Show session summary</button>
-        <button id="resetSessionBtn" class="danger-btn full-btn">Reset session</button>
-      </div>
-    </aside>
+              <div class="button-group">
+                <button class="btn btn-primary answer-btn" id="yesBtn">Yes</button>
+                <button class="btn btn-secondary answer-btn" id="noBtn">No</button>
+              </div>
+            </div>
+          </div>
 
-    <main class="main-content">
-      <section class="hero-card">
-        <p class="eyebrow">Prototype v1.3</p>
-        <h2>Guided Variable Screening</h2>
-        <p>
-          Screen one variable at a time, classify it according to the decision tree,
-          and build a running summary for the full covariate set.
+          <div id="resultCard" class="result-card hidden" aria-live="polite"></div>
+
+          <section id="summarySection" class="summary-card hidden">
+            <div class="module-header">
+              <div>
+                <p class="module-kicker">Output</p>
+                <h2 class="section-title">Session Summary</h2>
+              </div>
+            </div>
+
+            <p class="module-intro">
+              Review the variables screened during this session and their current classifications.
+            </p>
+
+            <div class="summary-table-wrap">
+              <table class="summary-table">
+                <thead>
+                  <tr>
+                    <th>Variable</th>
+                    <th>Classification</th>
+                    <th>Initial rationale snapshot</th>
+                  </tr>
+                </thead>
+                <tbody id="summaryTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+      </main>
+
+      <aside class="panel panel-side">
+        <div class="panel-eyebrow">Prototype v1.3</div>
+
+        <h2 class="section-title side-title">Live Summary</h2>
+        <p class="panel-subtitle">
+          Session state updates as you screen each candidate covariate.
         </p>
-      </section>
 
-      <section class="flow-card">
-        <div id="variableEntry" class="step active">
-          <div class="step-meta">Variable setup</div>
-          <h3>Enter a variable to screen</h3>
-          <p class="help-text">
-            The exposure and outcome should stay fixed during a session. Enter one candidate variable,
-            then proceed through the decision tree.
-          </p>
+        <div class="summary-stack">
+          <div class="summary-item">
+            <span class="summary-label">Exposure</span>
+            <span id="liveExposure" class="summary-value is-empty">Not entered</span>
+          </div>
 
-          <label for="variableName" class="inline-label">Variable under review</label>
-          <input id="variableName" type="text" placeholder="e.g. aneurysm size" class="main-input" />
+          <div class="summary-item">
+            <span class="summary-label">Outcome</span>
+            <span id="liveOutcome" class="summary-value is-empty">Not entered</span>
+          </div>
 
-          <div class="button-group">
-            <button id="beginVariableBtn" class="primary-btn">Begin screening</button>
+          <div class="variable-slot">
+            <span class="variable-slot-label">Current variable</span>
+            <span id="liveVariable" class="variable-slot-value is-empty">Awaiting variable entry</span>
+            <span id="liveVariableHint" class="variable-slot-hint">
+              Enter one covariate to classify it through the screening flow.
+            </span>
+          </div>
+
+          <div class="summary-counter">
+            <span id="liveCount" class="summary-counter-number">0</span>
+            <span class="summary-counter-label">variables screened</span>
           </div>
         </div>
 
-        <div id="questionCard" class="step hidden">
-          <div id="stepMeta" class="step-meta"></div>
-          <h3 id="stepTitle"></h3>
-          <p id="stepQuestion" class="question"></p>
-          <p id="stepHelp" class="help-text"></p>
-
-          <div class="button-group">
-            <button class="answer-btn" id="yesBtn">Yes</button>
-            <button class="answer-btn secondary" id="noBtn">No</button>
-          </div>
+        <div class="action-row side-actions">
+          <button id="showSummaryBtn" class="btn btn-secondary btn-full">
+            Show session summary
+          </button>
+          <button id="resetSessionBtn" class="btn btn-danger btn-full">
+            Reset session
+          </button>
         </div>
 
-        <div id="resultCard" class="result-card hidden"></div>
+        <div class="side-divider"></div>
 
-        <div id="summaryCard" class="summary-card hidden"></div>
-      </section>
-    </main>
+        <div class="mini-meta">
+          <span class="mini-meta-label">Mode</span>
+          <span class="mini-meta-value">Interactive prototype</span>
+        </div>
+      </aside>
+    </div>
   </div>
 
   <script src="script.js"></script>
