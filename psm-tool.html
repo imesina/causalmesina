@@ -1,126 +1,219 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PSM Covariate Screening Tool</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div class="app-shell">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-badge">PSM</div>
-        <div>
-          <h1>PSM Covariate Screening Tool</h1>
-          <p class="brand-subtitle">Structured support for variable triage in propensity score models</p>
-        </div>
-      </div>
-
-      <div class="context-card">
-        <h2>Study Context</h2>
-
-        <label for="exposure">Exposure / Treatment</label>
-        <input
-          type="text"
-          id="exposure"
-          placeholder="e.g. Coiling vs clipping"
-        />
-
-        <label for="outcome">Outcome</label>
-        <input
-          type="text"
-          id="outcome"
-          placeholder="e.g. 90-day functional outcome"
-        />
-
-        <label for="variableName">Variable under review</label>
-        <input
-          type="text"
-          id="variableName"
-          placeholder="e.g. aneurysm size"
-        />
-      </div>
-
-      <div class="live-context">
-        <h2>Live Summary</h2>
-        <div class="summary-row">
-          <span class="summary-label">Exposure</span>
-          <span id="liveExposure" class="summary-value muted">Not entered</span>
-        </div>
-        <div class="summary-row">
-          <span class="summary-label">Outcome</span>
-          <span id="liveOutcome" class="summary-value muted">Not entered</span>
-        </div>
-        <div class="summary-row">
-          <span class="summary-label">Variable</span>
-          <span id="liveVariable" class="summary-value muted">Not entered</span>
-        </div>
-      </div>
-    </aside>
-
-    <main class="main-content">
-      <header class="topbar">
-        <nav>
-          <a href="index.html" class="active">Tool</a>
-        </nav>
-      </header>
-
-      <section class="hero-card">
-        <p class="eyebrow">Prototype v2</p>
-        <h2>Guided Variable Screening</h2>
-        <p>
-          This prototype walks investigators through the first two exclusion steps:
-          baseline eligibility and mediation.
-        </p>
-      </section>
-
-      <section class="flow-card">
-        <div id="introStep" class="step active">
-          <h3>Start screening</h3>
-          <p>
-            First define the exposure, outcome, and variable under review. Then begin the guided assessment.
-          </p>
-          <button id="startBtn" class="primary-btn">Begin</button>
-        </div>
-
-        <div id="step1" class="step hidden">
-          <div class="step-meta">Step 1 of 2</div>
-          <h3>Baseline check</h3>
-          <p class="question">
-            Does the variable reflect baseline status or a clinical feature already established when treatment selection occurred?
-          </p>
-          <p class="help-text">
-            If the variable arose only after treatment initiation or was defined using post-treatment information, it should not be included in the propensity score model.
-          </p>
-
-          <div class="button-group">
-            <button class="answer-btn" onclick="handleStep1('yes')">Yes</button>
-            <button class="answer-btn secondary" onclick="handleStep1('no')">No</button>
-          </div>
-        </div>
-
-        <div id="step2" class="step hidden">
-          <div class="step-meta">Step 2 of 2</div>
-          <h3>Mediator check</h3>
-          <p class="question">
-            Is the variable part of the mechanism through which treatment may affect the outcome?
-          </p>
-          <p class="help-text">
-            If yes, the variable may function as a mediator and should not be included in the propensity score model.
-          </p>
-
-          <div class="button-group">
-            <button class="answer-btn" onclick="handleStep2('yes')">Yes</button>
-            <button class="answer-btn secondary" onclick="handleStep2('no')">No</button>
-          </div>
-        </div>
-
-        <div id="resultCard" class="result-card hidden"></div>
-      </section>
-    </main>
+<div class="app-shell">
+  <div class="top-strip">
+    <div class="kicker">PSM • Covariate Screening</div>
   </div>
 
-  <script src="script.js"></script>
-</body>
-</html>
+  <header class="hero-card">
+    <div class="hero-meta">
+      <span class="hero-chip">Prototype v1.3</span>
+    </div>
+
+    <h1 class="hero-title">
+      Propensity Score Matching <span class="accent">Covariate Screening Tool</span>
+    </h1>
+
+    <p class="hero-subtitle">
+      Structured support for variable triage in propensity score models.
+    </p>
+  </header>
+
+  <div class="layout-grid">
+    <main class="panel panel-main">
+      <section class="module-block">
+        <div class="module-header">
+          <div>
+            <p class="module-kicker">Session setup</p>
+            <h2 class="section-title">Study Context</h2>
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="exposureInput">Exposure/Treatment to be compared</label>
+            <input
+              id="exposureInput"
+              class="main-input"
+              type="text"
+              placeholder="e.g. Coiling vs clipping"
+            />
+          </div>
+
+          <div class="field">
+            <label for="outcomeInput">Primary Outcome</label>
+            <input
+              id="outcomeInput"
+              class="main-input"
+              type="text"
+              placeholder="e.g. 90-day mRS"
+            />
+          </div>
+        </div>
+
+        <div class="context-actions">
+          <button id="lockContextBtn" class="btn btn-primary">
+            Lock study context
+          </button>
+
+          <div id="contextStatus" class="context-status hidden" aria-live="polite">
+            <span class="context-status-dot"></span>
+            <span>Study context locked</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="module-block">
+        <div class="module-header">
+          <div>
+            <p class="module-kicker">Interactive screening</p>
+            <h2 class="section-title">Guided Variable Screening</h2>
+          </div>
+        </div>
+
+        <p class="module-intro">
+          Screen one variable at a time, classify it through the decision flow, and build a running summary for the full covariate set.
+        </p>
+
+        <div class="variable-entry-card">
+          <label for="variableInput" class="inline-label">Candidate variable</label>
+          <input
+            id="variableInput"
+            class="main-input"
+            type="text"
+            placeholder="Enter one candidate covariate"
+          />
+
+          <div class="variable-entry-actions">
+            <button id="beginScreenBtn" class="btn btn-primary">
+              Begin screening
+            </button>
+          </div>
+        </div>
+
+        <div id="screeningFlow" class="flow-card hidden">
+          <div class="flow-topbar">
+            <div class="flow-current">
+              <span class="flow-current-label">Current variable</span>
+              <span id="flowCurrentVariable" class="flow-current-value">Age at surgery</span>
+            </div>
+
+            <div class="flow-progress">
+              <span class="flow-progress-label">Step</span>
+              <span id="flowStepCounter" class="flow-progress-value">1 / 6</span>
+            </div>
+          </div>
+
+          <div id="stepContainer" class="step">
+            <p class="question">
+              Is this variable measured before treatment assignment?
+            </p>
+
+            <p class="help-text">
+              Variables determined after treatment or affected by treatment should not enter the propensity score model.
+            </p>
+
+            <div class="action-row">
+              <button class="btn btn-primary answer-btn" data-answer="yes">Yes</button>
+              <button class="btn btn-secondary answer-btn" data-answer="no">No</button>
+              <button class="btn btn-secondary answer-btn" data-answer="uncertain">Uncertain</button>
+            </div>
+          </div>
+
+          <div id="resultCard" class="result-card hidden" aria-live="polite">
+            <span id="resultKicker" class="result-kicker">Classification</span>
+            <h3 id="resultTitle">Include</h3>
+            <p id="resultText">
+              This variable is a plausible pre-treatment confounder and can proceed for further consideration.
+            </p>
+
+            <div class="action-row">
+              <button id="screenNextBtn" class="btn btn-primary">Screen next variable</button>
+              <button id="reviewSummaryBtn" class="btn btn-secondary">Review summary</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="summarySection" class="summary-card hidden">
+        <div class="module-header">
+          <div>
+            <p class="module-kicker">Output</p>
+            <h2 class="section-title">Session Summary</h2>
+          </div>
+        </div>
+
+        <p class="module-intro">
+          Review the variables screened during this session and their current classifications.
+        </p>
+
+        <div class="summary-table-wrap">
+          <table class="summary-table">
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Classification</th>
+                <th>Reasoning</th>
+              </tr>
+            </thead>
+            <tbody id="summaryTableBody">
+              <tr>
+                <td>Age at surgery</td>
+                <td><span class="badge badge-include">Include</span></td>
+                <td>Pre-treatment patient characteristic plausibly related to treatment selection and outcome.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <aside class="panel panel-side">
+      <div class="panel-eyebrow">Prototype v1.3</div>
+
+      <h2 class="section-title side-title">Live Summary</h2>
+      <p class="panel-subtitle">
+        Session state updates as you screen each candidate covariate.
+      </p>
+
+      <div class="summary-stack">
+        <div class="summary-item">
+          <span class="summary-label">Exposure</span>
+          <span id="liveExposure" class="summary-value is-empty">Not entered</span>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">Outcome</span>
+          <span id="liveOutcome" class="summary-value is-empty">Not entered</span>
+        </div>
+
+        <div class="variable-slot">
+          <span class="variable-slot-label">Current variable</span>
+          <span id="liveVariable" class="variable-slot-value is-empty">Awaiting variable entry</span>
+          <span id="liveVariableHint" class="variable-slot-hint">
+            Enter one covariate to classify it through the screening flow.
+          </span>
+        </div>
+
+        <div class="summary-counter">
+          <span id="liveCount" class="summary-counter-number">0</span>
+          <span class="summary-counter-label">variables screened</span>
+        </div>
+      </div>
+
+      <div class="action-row side-actions">
+        <button id="showSummaryBtn" class="btn btn-secondary btn-full">
+          Show session summary
+        </button>
+        <button id="resetSessionBtn" class="btn btn-danger btn-full">
+          Reset session
+        </button>
+      </div>
+
+      <div class="side-divider"></div>
+
+      <div class="mini-meta">
+        <span class="mini-meta-label">Mode</span>
+        <span class="mini-meta-value">Interactive prototype</span>
+      </div>
+    </aside>
+  </div>
+</div>
